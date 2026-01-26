@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+<head>
+<title>MENSWARE | Products</title>
+<link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Montserrat&display=swap" rel="stylesheet">
+<style>
+body{margin:0;background:#050505;color:#eee;font-family:Montserrat}
+header{text-align:center;padding:60px}
+.logo{width:120px;filter:drop-shadow(0 0 20px crimson)}
+h1{font-family:Orbitron;color:#b30000;letter-spacing:6px}
+.products{
+display:grid;
+grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
+gap:30px;
+padding:50px}
+.card{
+background:#0d0d0d;
+border-radius:15px;
+padding:15px;
+box-shadow:0 0 25px rgba(120,0,0,0.4);
+text-align:center;
+transition:.3s}
+.card:hover{transform:scale(1.05)}
+.card img{width:100%;border-radius:12px}
+.price{color:#b30000;font-size:18px}
+a{color:white;text-decoration:none}
+button{
+background:#b30000;
+border:none;
+padding:10px 20px;
+margin-top:10px;
+color:white;
+cursor:pointer}
+</style>
+</head>
+
+<body>
+
+<header>
+<img src="WhatsApp Image 2026-01-24 at 12.07.06 PM.jpeg" class="logo">
+<h1>MENSWARE</h1>
+<p>Luxury Men’s Accessories</p>
+</header>
+
+<section class="products">
+
+<div class="card">
+<img src="WhatsApp Image 2026-01-24 at 12.07.04 PM.jpeg">
+<h3>Rings Set</h3>
+<p class="price">₹2,499</p>
+<a href="product.html?item=Ring Set&price=2499">
+<button>View Product</button></a>
+</div>
+
+<div class="card">
+<img src="WhatsApp Image 2026-01-24 at 12.07.04 PM (1).jpeg">
+<h3>Minimal Chain</h3>
+<p class="price">₹1,799</p>
+<a href="product.html?item=Minimal Chain&price=1799">
+<button>View Product</button></a>
+</div>
+
+<div class="card">
+<img src="WhatsApp Image 2026-01-24 at 12.07.04 PM (3).jpeg">
+<h3>Steel Sun Necklace</h3>
+<p class="price">₹3,299</p>
+<a href="product.html?item=Sun Necklace&price=3299">
+<button>View Product</button></a>
+</div>
+
+<div class="card">
+<img src="WhatsApp Image 2026-01-24 at 12.07.03 PM.jpeg">
+<h3>Dark Cross Chain</h3>
+<p class="price">₹2,199</p>
+<a href="product.html?item=Cross Chain&price=2199">
+<button>View Product</button></a>
+</div>
+
+</section>
+
+</body>
+</html>
