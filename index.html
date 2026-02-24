@@ -1,82 +1,513 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
-<title>MENSWARE | Products</title>
-<link href="https://fonts.googleapis.com/css2?family=Orbitron&family=Montserrat&display=swap" rel="stylesheet">
-<style>
-body{margin:0;background:#050505;color:#eee;font-family:Montserrat}
-header{text-align:center;padding:60px}
-.logo{width:120px;filter:drop-shadow(0 0 20px crimson)}
-h1{font-family:Orbitron;color:#b30000;letter-spacing:6px}
-.products{
-display:grid;
-grid-template-columns:repeat(auto-fit,minmax(250px,1fr));
-gap:30px;
-padding:50px}
-.card{
-background:#0d0d0d;
-border-radius:15px;
-padding:15px;
-box-shadow:0 0 25px rgba(120,0,0,0.4);
-text-align:center;
-transition:.3s}
-.card:hover{transform:scale(1.05)}
-.card img{width:100%;border-radius:12px}
-.price{color:#b30000;font-size:18px}
-a{color:white;text-decoration:none}
-button{
-background:#b30000;
-border:none;
-padding:10px 20px;
-margin-top:10px;
-color:white;
-cursor:pointer}
-</style>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>MENSWARE | Products</title>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@400;700;900&family=Montserrat:wght@300;400;600&display=swap" rel="stylesheet">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0/css/all.min.css">
+  <style>
+    body {
+      margin: 0;
+      background: linear-gradient(135deg, #050505 0%, #1a1a1a 100%);
+      color: #eee;
+      font-family: 'Montserrat', sans-serif;
+      overflow-x: hidden;
+      scroll-behavior: smooth;
+    }
+
+    /* Metallic texture overlay for masculinity */
+    body::before {
+      content: '';
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: url('data:image/svg+xml,<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><defs><pattern id="grain" width="100" height="100" patternUnits="userSpaceOnUse"><circle cx="50" cy="50" r="1" fill="%23b30000" opacity="0.05"/></pattern></defs><rect width="100" height="100" fill="url(%23grain)"/></svg>') repeat;
+      pointer-events: none;
+      z-index: -1;
+    }
+
+    header {
+      text-align: center;
+      padding: 80px 20px;
+      background: linear-gradient(135deg, #0d0d0d, #050505);
+      position: relative;
+      box-shadow: 0 0 50px rgba(179, 0, 0, 0.5);
+    }
+
+    .logo {
+      width: 150px;
+      filter: drop-shadow(0 0 30px crimson) brightness(1.2);
+      transition: transform 0.3s ease;
+    }
+
+    .logo:hover {
+      transform: scale(1.1);
+    }
+
+    h1 {
+      font-family: 'Orbitron', sans-serif;
+      color: #b30000;
+      letter-spacing: 8px;
+      font-size: 3rem;
+      margin: 20px 0;
+      text-shadow: 0 0 20px rgba(179, 0, 0, 0.8);
+      animation: glow 2s ease-in-out infinite alternate;
+    }
+
+    @keyframes glow {
+      from { text-shadow: 0 0 20px rgba(179, 0, 0, 0.8); }
+      to { text-shadow: 0 0 30px rgba(179, 0, 0, 1); }
+    }
+
+    header p {
+      font-size: 1.2rem;
+      color: #ccc;
+      font-weight: 300;
+      letter-spacing: 2px;
+    }
+
+    /* Navigation Bar */
+    nav {
+      background: #0d0d0d;
+      padding: 15px 30px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      position: sticky;
+      top: 0;
+      z-index: 1000;
+      box-shadow: 0 2px 20px rgba(179, 0, 0, 0.3);
+    }
+
+    nav h2 {
+      margin: 0;
+      color: #b30000;
+      font-family: 'Orbitron', sans-serif;
+      font-size: 1.5rem;
+    }
+
+    nav ul {
+      list-style: none;
+      display: flex;
+      gap: 20px;
+    }
+
+    nav ul li a {
+      color: #eee;
+      text-decoration: none;
+      font-weight: 600;
+      padding: 8px 12px;
+      border-radius: 5px;
+      transition: all 0.3s ease;
+    }
+
+    nav ul li a:hover {
+      background: #b30000;
+      color: #fff;
+      box-shadow: 0 0 10px rgba(179, 0, 0, 0.5);
+    }
+
+    /* Search Bar */
+    .search-bar {
+      display: flex;
+      align-items: center;
+      background: #1a1a1a;
+      border: 1px solid #b30000;
+      border-radius: 25px;
+      padding: 5px 15px;
+      margin: 20px auto;
+      max-width: 400px;
+    }
+
+    .search-bar input {
+      background: transparent;
+      border: none;
+      color: #eee;
+      padding: 10px;
+      width: 100%;
+      outline: none;
+    }
+
+    .search-bar button {
+      background: #b30000;
+      border: none;
+      color: #fff;
+      padding: 10px;
+      border-radius: 50%;
+      cursor: pointer;
+      transition: all 0.3s ease;
+    }
+
+    .search-bar button:hover {
+      background: #990000;
+      box-shadow: 0 0 10px rgba(179, 0, 0, 0.5);
+    }
+
+    /* Products Section - Arranged equally with same sizes */
+    .products {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); /* Ensures equal sizes and responsive layout */
+      gap: 40px;
+      padding: 60px 20px;
+      max-width: 1200px;
+      margin: 0 auto;
+      justify-items: center;
+    }
+
+    .card {
+      background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+      border-radius: 20px;
+      padding: 20px;
+      box-shadow: 0 0 30px rgba(179, 0, 0, 0.4);
+      text-align: center;
+      transition: all 0.3s ease;
+      position: relative;
+      overflow: hidden;
+      border: 1px solid #b30000;
+      width: 100%;
+      max-width: 280px; /* Fixed max-width for equal sizes */
+      min-height: 400px; /* Increased to accommodate larger image */
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+    }
+
+    .card::before {
+      content: '';
+      position: absolute;
+      top: 0;
+      left: -100%;
+      width: 100%;
+      height: 100%;
+      background: linear-gradient(90deg, transparent, rgba(179, 0, 0, 0.2), transparent);
+      transition: left 0.5s ease;
+    }
+
+    .card:hover::before {
+      left: 100%;
+    }
+
+    .card:hover {
+      transform: scale(1.05) translateY(-10px);
+      box-shadow: 0 0 50px rgba(179, 0, 0, 0.6);
+    }
+
+    .card img {
+      width: 100%;
+      height: 250px; /* Increased from 200px to 250px for larger image size */
+      object-fit: contain; /* Ensures the whole image is visible without cropping */
+      border-radius: 15px;
+      transition: transform 0.3s ease;
+      filter: brightness(0.9);
+      background: #1a1a1a; /* Optional: background color if image has transparency */
+    }
+
+    .card:hover img {
+      transform: scale(1.05);
+      filter: brightness(1.1);
+    }
+
+    .card h3 {
+      font-family: 'Orbitron', sans-serif;
+      color: #b30000;
+      margin: 10px 0 5px 0; /* Reduced top margin from 15px to 10px, bottom from 15px to 5px to decrease gap */
+      font-size: 1.4rem;
+      letter-spacing: 2px;
+    }
+
+    .price {
+      color: #b30000;
+      font-size: 20px;
+      font-weight: 600;
+      margin: 5px 0 15px 0; /* Reduced top margin from 10px to 5px, bottom from 10px to 15px to fill space */
+    }
+
+    .card button {
+      background: linear-gradient(135deg, #b30000, #990000);
+      border: none;
+      padding: 12px 25px;
+      margin: 5px;
+      color: white;
+      cursor: pointer;
+      border-radius: 25px;
+      font-weight: 600;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px rgba(179, 0, 0, 0.3);
+    }
+
+    .card button:hover {
+      background: linear-gradient(135deg, #990000, #b30000);
+      box-shadow: 0 0 20px rgba(179, 0, 0, 0.5);
+      transform: translateY(-2px);
+    }
+
+    /* Additional Sections */
+    .about {
+      padding: 80px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #1a1a1a, #0d0d0d);
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .about h2 {
+      font-family: 'Orbitron', sans-serif;
+      color: #b30000;
+      font-size: 2.5rem;
+      margin-bottom: 20px;
+    }
+
+    .about p {
+      font-size: 1.1rem;
+      line-height: 1.6;
+      color: #ccc;
+    }
+
+    .testimonials {
+      padding: 80px 20px;
+      text-align: center;
+      background: #050505;
+    }
+
+    .testimonial-box {
+      display: flex;
+      flex-wrap: wrap;
+      justify-content: center;
+      gap: 30px;
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .testimonial {
+      background: #0d0d0d;
+      padding: 30px;
+      border-radius: 15px;
+      box-shadow: 0 0 25px rgba(179, 0, 0, 0.3);
+      width: 300px;
+      font-style: italic;
+      border: 1px solid #b30000;
+    }
+
+    .testimonial p {
+      color: #ccc;
+      margin-bottom: 15px;
+    }
+
+    .testimonial cite {
+      font-weight: bold;
+      color: #b30000;
+    }
+
+    .contact {
+      padding: 80px 20px;
+      text-align: center;
+      background: linear-gradient(135deg, #0d0d0d, #1a1a1a);
+    }
+
+    .contact form {
+      max-width: 600px;
+      margin: 0 auto;
+      display: flex;
+      flex-direction: column;
+      gap: 20px;
+    }
+
+    .contact input, .contact textarea {
+      padding: 15px;
+      border: 1px solid #b30000;
+      border-radius: 10px;
+      background: #1a1a1a;
+      color: #eee;
+      font-size: 16px;
+      outline: none;
+    }
+
+    .contact button {
+      padding: 15px 30px;
+      background: #b30000;
+      color: white;
+      border: none;
+      border-radius: 25px;
+      cursor: pointer;
+      font-weight: 600;
+      transition: all 0.3s ease;
+    }
+
+    .contact button:hover {
+      background: #990000;
+      box-shadow: 0 0 20px rgba(179, 0, 0, 0.5);
+    }
+
+    /* Footer */
+    footer {
+      background: #0d0d0d;
+      text-align: center;
+      padding: 30px;
+      color: #ccc;
+      border-top: 1px solid #b30000;
+    }
+
+    footer a {
+      color: #b30000;
+      text-decoration: none;
+      margin: 0 10px;
+      transition: color 0.3s ease;
+    }
+
+    footer a:hover {
+      color: #eee;
+    }
+
+    /* Responsive */
+    @media (max-width: 768px) {
+      .products {
+        grid-template-columns: 1fr;
+      }
+      h1 {
+        font-size: 2rem;
+      }
+      nav ul {
+        flex-direction: column;
+        gap: 10px;
+      }
+      .testimonial-box {
+        flex-direction: column;
+        align-items: center;
+      }
+    }
+
+    /* Modal for Quick View */
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.8);
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal-content {
+      background: #0d0d0d;
+      padding: 30px;
+      border-radius: 20px;
+      max-width: 500px;
+      width: 90%;
+      text-align: center;
+      border: 1px solid #b30000;
+      box-shadow: 0 0 50px rgba(179, 0, 0, 0.5);
+    }
+
+    .modal-content img {
+      width: 100%;
+      border-radius: 15px;
+      margin-bottom: 20px;
+    }
+
+    .close {
+      float: right;
+      font-size: 28px;
+      color: #b30000;
+      cursor: pointer;
+    }
+  </style>
 </head>
 
 <body>
 
+<!-- Navigation -->
+<nav>
+  <h2>MENSWARE</h2>
+  <ul>
+    <li><a href="#products">Products</a></li>
+    <li><a href="#about">About</a></li>
+    <li><a href="#testimonials">Testimonials</a></li>
+    <li><a href="#contact">Contact</a></li>
+  </ul>
+</nav>
+
+<!-- Header -->
 <header>
-<img src="WhatsApp Image 2026-01-24 at 12.07.06 PM.jpeg" class="logo">
-<h1>MENSWARE</h1>
-<p>Luxury Men’s Accessories</p>
+  <img src="WhatsApp Image 2026-01-24 at 12.07.06 PM.jpeg" class="logo" alt="MENSWARE Logo">
+  <h1>MENSWARE</h1>
+  <p>Luxury Men’s Accessories</p>
 </header>
 
-<section class="products">
-
-<div class="card">
-<img src="WhatsApp Image 2026-01-24 at 12.07.04 PM.jpeg">
-<h3>Rings Set</h3>
-<p class="price">₹2,499</p>
-<a href="product.html?item=Ring Set&price=2499">
-<button>View Product</button></a>
+<!-- Search Bar -->
+<div class="search-bar">
+  <input type="text" placeholder="Search products..." id="search-input">
+  <button onclick="searchProducts()"><i class="fas fa-search"></i></button>
 </div>
 
-<div class="card">
-<img src="WhatsApp Image 2026-01-24 at 12.07.04 PM (1).jpeg">
-<h3>Minimal Chain</h3>
-<p class="price">₹1,799</p>
-<a href="product.html?item=Minimal Chain&price=1799">
-<button>View Product</button></a>
-</div>
+<!-- Products Section - All products arranged equally with same sizes -->
+<section id="products" class="products">
+  <div class="card" data-name="Rings Set">
+    <img src="WhatsApp Image 2026-01-24 at 12.07.04 PM.jpeg" alt="Rings Set">
+    <h3>Rings Set</h3>
+    <p class="price">₹999</p>
+    <div>
+      <button onclick="openModal('rings-modal')">Quick View</button>
+      <a href="product.html?item=Rings Set&price=999"><button>View Product</button></a>
+    </div>
+  </div>
 
-<div class="card">
-<img src="WhatsApp Image 2026-01-24 at 12.07.04 PM (3).jpeg">
-<h3>Steel Sun Necklace</h3>
-<p class="price">₹3,299</p>
-<a href="product.html?item=Sun Necklace&price=3299">
-<button>View Product</button></a>
-</div>
+  <div class="card" data-name="Minimal Chain">
+    <img src="WhatsApp Image 2026-01-24 at 12.07.04 PM (1).jpeg" alt="Minimal Chain">
+    <h3>Minimal Chain</h3>
+    <p class="price">₹799</p>
+    <div>
+      <button onclick="openModal('chain-modal')">Quick View</button>
+      <a href="product.html?item=Minimal Chain&price=799"><button>View Product</button></a>
+    </div>
+  </div>
 
-<div class="card">
-<img src="WhatsApp Image 2026-01-24 at 12.07.03 PM.jpeg">
-<h3>Dark Cross Chain</h3>
-<p class="price">₹2,199</p>
-<a href="product.html?item=Cross Chain&price=2199">
-<button>View Product</button></a>
-</div>
+  <div class="card" data-name="Steel Sun Necklace">
+    <img src="WhatsApp Image 2026-01-24 at 12.07.04 PM (3).jpeg" alt="Steel Sun Necklace">
+    <h3>Steel Sun Necklace</h3>
+    <p class="price">₹1299</p>
+    <div>
+      <button onclick="openModal('necklace-modal')">Quick View</button>
+      <a href="product.html?item=Steel Sun Necklace&price=1299"><button>View Product</button></a>
+    </div>
+  </div>
 
+  <div class="card" data-name="Dark Cross Chain">
+    <img src="WhatsApp Image 2026-02-01 at 4.52.33 PM.jpeg" alt="Dark Cross Chain">
+    <h3>Dark Cross Chain</h3>
+    <p class="price">₹699</p>
+    <div>
+      <button onclick="openModal('cross-modal')">Quick View</button>
+      <a href="product.html?item=Dark Cross Chain&price=699"><button>View Product</button></a>
+    </div>
+  </div>
+
+  <div class="card" data-name="Dark Cross Drop Earring">
+    <img src="WhatsApp Image 2026-02-01 at 4.52.33 PM (2).jpeg" alt="Dark Cross Drop Earring">
+    <h3>Dark Cross Drop Earring</h3>
+    <p class="price">₹499</p>
+    <div>
+      <button onclick="openModal('earring-modal')">Quick View</button>
+      <a href="product.html?item=Dark Cross Drop Earring&price=499"><button>View Product</button></a>
+    </div>
+  </div>
+
+  <div class="card" data-name="Cross Charm Bracelet">
+    <img src="WhatsApp Image 2026-02-01 at 4.52.33 PM (1).jpeg" alt="Cross Charm Bracelet">
+    <h3>Cross Charm Bracelet</h3>
+    <p class="price">₹899</p>
+    <div>
+      <button onclick="openModal('bracelet-modal')">Quick View</button>
+      <a href="product.html?item=Cross Charm Bracelet&price=899"><button>View Product</button></a>
+    </div>
+  </div>
 </section>
 
-</body>
-</html>
+<!-- About Section -->
+<section id="about" class="about">
+  <h2>About MENSWARE</h2>
