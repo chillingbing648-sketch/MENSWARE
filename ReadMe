@@ -1,0 +1,22 @@
+# MENSWARE | Luxury Men’s Accessories
+
+MENSWARE is a premium, high-conversion frontend interface designed for luxury retail. The application utilizes a dark-mode aesthetic with high-contrast crimson accents to evoke a sense of exclusivity and modern sophistication.
+
+## 💎 Features
+* **Responsive Product Grid**: Adaptive layout using CSS Grid that scales from mobile to ultra-wide desktops.
+* **Visual Polish**: Interactive hover states and hardware-accelerated transitions ($0.3s$ scale transforms).
+* **Typography**: Optimized font loading via Google Fonts (Orbitron for branding, Montserrat for readability).
+* **Dynamic Linking**: Pre-configured for client-side routing via URL search parameters.
+* **Optimized Performance**: Zero-dependency architecture ensuring near-instantaneous PageSpeed scores.
+
+## 🛠 Tech Stack
+* **Frontend**: HTML5, CSS3.
+* **Typography**: Google Fonts API.
+* **Assets**: Optimized JPEG product photography.
+
+## 📂 Project Structure
+```text
+mensware/
+├── index.html        # Main landing page & product gallery
+├── product.html      # Individual product view (planned)
+└── assets/           # Directory for high-res product images
