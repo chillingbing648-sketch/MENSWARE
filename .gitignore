@@ -1,0 +1,26 @@
+### 3️⃣ .gitignore
+
+```text
+# OS Files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Editor / IDE Settings
+.vscode/
+.idea/
+*.swp
+*.swo
+
+# Temporary Files
+*.log
+tmp/
+
+# Future-proofing for Node.js
+node_modules/
+dist/
+build/
+.env
+
+# Image caches
+.thumbnails/
