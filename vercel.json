@@ -1,1 +1,1 @@
-{"version":2,"builds":[{"src":"api/index.js","use":"@vercel/node"}],"routes":[{"src":"/(.*)","dest":"/api/index.js"}]}
+{"$schema":"https://openapi.vercel.sh/vercel.json","builds":[{"src":"server.js","use":"@vercel/node"},{"src":"*.html","use":"@vercel/static"},{"src":"*.jpeg","use":"@vercel/static"},{"src":"*.mp4","use":"@vercel/static"}],"routes":[{"src":"/api/(.*)","dest":"/server.js"},{"src":"/checkout","dest":"/checkout.html"},{"src":"/","dest":"/index.html"}]}
