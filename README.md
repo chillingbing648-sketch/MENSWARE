@@ -8,18 +8,9 @@
 
 ```text
 Browser
-  │
-  ├── /                    → index.html
-  ├── /checkout            → checkout.html
-  │
-  └── /api/*               → Express API
-                              ├── Auth
-                              ├── Products
-                              ├── Cart
-                              └── Orders
-                                      │
-                                      ▼
-                                  MongoDB
+  ├── /              → index.html
+  ├── /checkout      → checkout.html
+  └── /api/*         → Express → MongoDB
 ```
 
 ## Tech Stack
@@ -45,7 +36,7 @@ Browser
 - Server-side order pricing and stock validation
 - Customer order history and protected order lookup
 - Admin order listing and status management
-- Checkout page connected directly to cart + order APIs
+- Checkout connected directly to cart + order APIs
 - `/api/health` database health check
 - Same-origin API configuration for production deployment
 
@@ -123,17 +114,17 @@ Open `http://localhost:5000`.
 
 ## Deployment
 
-The repository now contains Vercel routing for the Express API and root storefront. Vercel requires the production environment to contain `MONGO_URI`, `JWT_SECRET`, and the appropriate `FRONTEND_URL`. The API establishes its MongoDB connection lazily so serverless requests can reuse the connection.
+The repository is configured for Vercel with an Express serverless runtime plus static HTML/media builds. Production requires `MONGO_URI`, `JWT_SECRET`, and `FRONTEND_URL` environment variables. The database connection is lazy and reusable for serverless requests.
 
-Vercel's current Express guidance notes that static assets should normally be served through Vercel's static layer rather than relying on `express.static()`, so this repository explicitly builds the storefront HTML and media files alongside the Node function. citeturn2search1turn2search0
+Vercel's current Express guidance recommends serving static assets through its static layer rather than relying on `express.static()`. citeturn2search1turn2search0
 
 ## Verification Status
 
-**Code integration:** completed — frontend → auth → products → cart → checkout → orders are connected.
+**Integration:** completed — storefront → auth → products → cart → checkout → orders are connected.
 
 **Repository:** pushed to `main`.
 
-**Runtime deployment:** deployment credentials/project are not currently connected to this ChatGPT workspace, so a live production request cannot honestly be marked as verified here. Once the GitHub repository is imported into Vercel and the three environment variables are supplied, `/`, `/checkout`, and `/api/health` are the first production smoke tests to run.
+**Live production:** not marked as verified because this ChatGPT workspace has no existing Vercel project connected to MENSWARE, and no production environment variables are available. The repository is deployment-ready; after importing it into Vercel, smoke-test `/`, `/checkout`, and `/api/health` first.
 
 ## Author
 
