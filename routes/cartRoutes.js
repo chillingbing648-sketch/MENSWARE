@@ -2,13 +2,17 @@ const express = require("express");
 const crypto = require("crypto");
 const Cart = require("../models/Cart");
 const Product = require("../models/Product");
-const { authenticate } = require("../middleware/auth");
+const { optionalAuthenticate } = require("../middleware/auth");
 
 const router = express.Router();
+router.use(optionalAuthenticate);
 
 function sessionId(req, res) {
   let id = req.cookies?.cartSession;
-  if (!id) { id = crypto.randomUUID(); res.cookie("cartSession", id, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 1000 * 60 * 60 * 24 * 30 }); }
+  if (!id) {
+    id = crypto.randomUUID();
+    res.cookie("cartSession", id, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 1000 * 60 * 60 * 24 * 30 });
+  }
   return id;
 }
 
@@ -19,7 +23,7 @@ async function loadCart(req, res) {
   return cart;
 }
 
-router.get("/", async (req, res, next) => { try { const cart = await loadCart(req, res); res.json({ success: true, cart }); } catch (e) { next(e); } });
+router.get("/", async (req, res, next) => { try { res.json({ success: true, cart: await loadCart(req, res) }); } catch (e) { next(e); } });
 
 router.post("/items", async (req, res, next) => {
   try {
@@ -38,11 +42,21 @@ router.post("/items", async (req, res, next) => {
 });
 
 router.patch("/items/:itemId", async (req, res, next) => {
-  try { const qty = Number(req.body.quantity); if (!Number.isInteger(qty) || qty < 1 || qty > 20) return res.status(400).json({ success: false, message: "Quantity must be between 1 and 20" }); const cart = await loadCart(req, res); const item = cart.items.id(req.params.itemId); if (!item) return res.status(404).json({ success: false, message: "Cart item not found" }); item.quantity = qty; await cart.save(); await cart.populate("items.product"); res.json({ success: true, cart }); } catch (e) { next(e); }
+  try {
+    const qty = Number(req.body.quantity);
+    if (!Number.isInteger(qty) || qty < 1 || qty > 20) return res.status(400).json({ success: false, message: "Quantity must be between 1 and 20" });
+    const cart = await loadCart(req, res); const item = cart.items.id(req.params.itemId);
+    if (!item) return res.status(404).json({ success: false, message: "Cart item not found" });
+    item.quantity = qty; await cart.save(); await cart.populate("items.product"); res.json({ success: true, cart });
+  } catch (e) { next(e); }
 });
 
 router.delete("/items/:itemId", async (req, res, next) => {
-  try { const cart = await loadCart(req, res); const item = cart.items.id(req.params.itemId); if (!item) return res.status(404).json({ success: false, message: "Cart item not found" }); item.deleteOne(); await cart.save(); await cart.populate("items.product"); res.json({ success: true, cart }); } catch (e) { next(e); }
+  try {
+    const cart = await loadCart(req, res); const item = cart.items.id(req.params.itemId);
+    if (!item) return res.status(404).json({ success: false, message: "Cart item not found" });
+    item.deleteOne(); await cart.save(); await cart.populate("items.product"); res.json({ success: true, cart });
+  } catch (e) { next(e); }
 });
 
 router.delete("/", async (req, res, next) => { try { const cart = await loadCart(req, res); cart.items = []; await cart.save(); res.json({ success: true, cart }); } catch (e) { next(e); } });
