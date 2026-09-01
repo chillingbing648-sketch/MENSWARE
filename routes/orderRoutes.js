@@ -1,8 +1,82 @@
-const express=require("express"); const crypto=require("crypto"); const Order=require("../models/Order"); const Product=require("../models/Product"); const {authenticate,requireAdmin}=require("../middleware/auth"); const router=express.Router();
-function generateOrderNumber(){return `MW-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;}
-router.post("/",async(req,res,next)=>{try{const{name,email,phone,items,shippingAddress,paymentMethod="cod"}=req.body;if(!name||!email||!Array.isArray(items)||!items.length)return res.status(400).json({success:false,message:"Customer and order items are required"});if(!shippingAddress?.addressLine1||!shippingAddress?.city||!shippingAddress?.state||!shippingAddress?.postalCode)return res.status(400).json({success:false,message:"Complete shipping address is required"});if(!["cod","online","fampay"].includes(paymentMethod))return res.status(400).json({success:false,message:"Invalid payment method"});const products=await Product.find({_id:{$in:items.map(i=>i.productId)},isActive:true});const map=new Map(products.map(p=>[p._id.toString(),p]));const orderItems=[];let subtotal=0;for(const requested of items){const product=map.get(String(requested.productId));const quantity=Number(requested.quantity);if(!product)return res.status(404).json({success:false,message:"One or more products no longer exist"});if(!Number.isInteger(quantity)||quantity<1||quantity>20)return res.status(400).json({success:false,message:"Invalid product quantity"});const variant=requested.variantId?product.variants.id(requested.variantId):null;if(requested.variantId&&(!variant||!variant.isActive))return res.status(400).json({success:false,message:`Invalid variant for ${product.name}`});if(variant&&variant.stock<quantity)return res.status(409).json({success:false,message:`${product.name} is out of stock`});const unitPrice=variant?variant.price:product.basePrice;const totalPrice=unitPrice*quantity;subtotal+=totalPrice;orderItems.push({productId:product._id,variantId:variant?._id||null,name:product.name,sku:variant?.sku||null,image:product.images?.[0]||null,quantity,unitPrice,totalPrice});}const shippingFee=subtotal>=2000?0:99;const tax=Math.round(subtotal*.18*100)/100;const order=await Order.create({orderNumber:generateOrderNumber(),user:null,customer:{name,email,phone:phone||null},items:orderItems,shippingAddress,subtotal,shippingFee,tax,total:subtotal+shippingFee+tax,payment:{method:paymentMethod,status:paymentMethod==="cod"?"pending":"processing"}});res.status(201).json({success:true,message:"Order created successfully",order});}catch(e){next(e);}});
-router.get("/my",authenticate,async(req,res,next)=>{try{res.json({success:true,orders:await Order.find({user:req.user._id}).sort({createdAt:-1})});}catch(e){next(e);}});
-router.get("/admin/all",authenticate,requireAdmin,async(req,res,next)=>{try{res.json({success:true,orders:await Order.find().sort({createdAt:-1}).limit(100)});}catch(e){next(e);}});
-router.patch("/admin/:id/status",authenticate,requireAdmin,async(req,res,next)=>{try{const allowed=["pending","confirmed","processing","shipped","out_for_delivery","delivered","cancelled"];if(!allowed.includes(req.body.status))return res.status(400).json({success:false,message:"Invalid order status"});const order=await Order.findByIdAndUpdate(req.params.id,{status:req.body.status},{new:true,runValidators:true});if(!order)return res.status(404).json({success:false,message:"Order not found"});res.json({success:true,order});}catch(e){next(e);}});
-router.get("/:id",async(req,res,next)=>{try{const order=await Order.findById(req.params.id);if(!order)return res.status(404).json({success:false,message:"Order not found"});res.json({success:true,order});}catch(e){next(e);}});
-module.exports=router;
+const express = require("express");
+const crypto = require("crypto");
+const Order = require("../models/Order");
+const Product = require("../models/Product");
+const { authenticate, optionalAuthenticate, requireAdmin } = require("../middleware/auth");
+
+const router = express.Router();
+router.use(optionalAuthenticate);
+
+function generateOrderNumber() {
+  return `MW-${Date.now().toString(36).toUpperCase()}-${crypto.randomBytes(3).toString("hex").toUpperCase()}`;
+}
+
+router.post("/", async (req, res, next) => {
+  try {
+    const { name, email, phone, items, shippingAddress, paymentMethod = "cod" } = req.body;
+    if (!name || !email || !Array.isArray(items) || !items.length) return res.status(400).json({ success: false, message: "Customer and order items are required" });
+    if (!shippingAddress?.addressLine1 || !shippingAddress?.city || !shippingAddress?.state || !shippingAddress?.postalCode) return res.status(400).json({ success: false, message: "Complete shipping address is required" });
+    if (!["cod", "online", "fampay"].includes(paymentMethod)) return res.status(400).json({ success: false, message: "Invalid payment method" });
+
+    const products = await Product.find({ _id: { $in: items.map(i => i.productId) }, isActive: true });
+    const productMap = new Map(products.map(p => [p._id.toString(), p]));
+    const orderItems = [];
+    let subtotal = 0;
+
+    for (const requested of items) {
+      const product = productMap.get(String(requested.productId));
+      const quantity = Number(requested.quantity);
+      if (!product) return res.status(404).json({ success: false, message: "One or more products no longer exist" });
+      if (!Number.isInteger(quantity) || quantity < 1 || quantity > 20) return res.status(400).json({ success: false, message: "Invalid product quantity" });
+      const variant = requested.variantId ? product.variants.id(requested.variantId) : null;
+      if (requested.variantId && (!variant || !variant.isActive)) return res.status(400).json({ success: false, message: `Invalid variant for ${product.name}` });
+      if (variant && variant.stock < quantity) return res.status(409).json({ success: false, message: `${product.name} is out of stock` });
+      const unitPrice = variant ? variant.price : product.basePrice;
+      const totalPrice = unitPrice * quantity;
+      subtotal += totalPrice;
+      orderItems.push({ productId: product._id, variantId: variant?._id || null, name: product.name, sku: variant?.sku || null, image: product.images?.[0] || null, quantity, unitPrice, totalPrice });
+    }
+
+    const shippingFee = subtotal >= 2000 ? 0 : 99;
+    const tax = Math.round(subtotal * 0.18 * 100) / 100;
+    const order = await Order.create({
+      orderNumber: generateOrderNumber(),
+      user: req.user?._id || null,
+      customer: { name, email, phone: phone || null },
+      items: orderItems,
+      shippingAddress,
+      subtotal, shippingFee, tax, total: subtotal + shippingFee + tax,
+      payment: { method: paymentMethod, status: paymentMethod === "cod" ? "pending" : "processing" }
+    });
+    res.status(201).json({ success: true, message: "Order created successfully", order });
+  } catch (error) { next(error); }
+});
+
+router.get("/my", authenticate, async (req, res, next) => {
+  try { res.json({ success: true, orders: await Order.find({ user: req.user._id }).sort({ createdAt: -1 }) }); } catch (error) { next(error); }
+});
+
+router.get("/admin/all", authenticate, requireAdmin, async (req, res, next) => {
+  try { res.json({ success: true, orders: await Order.find().sort({ createdAt: -1 }).limit(100) }); } catch (error) { next(error); }
+});
+
+router.patch("/admin/:id/status", authenticate, requireAdmin, async (req, res, next) => {
+  try {
+    const allowed = ["pending", "confirmed", "processing", "shipped", "out_for_delivery", "delivered", "cancelled"];
+    if (!allowed.includes(req.body.status)) return res.status(400).json({ success: false, message: "Invalid order status" });
+    const order = await Order.findByIdAndUpdate(req.params.id, { status: req.body.status }, { new: true, runValidators: true });
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+    res.json({ success: true, order });
+  } catch (error) { next(error); }
+});
+
+router.get("/:id", async (req, res, next) => {
+  try {
+    const order = await Order.findById(req.params.id);
+    if (!order) return res.status(404).json({ success: false, message: "Order not found" });
+    if (order.user && (!req.user || (req.user.role !== "admin" && String(order.user) !== String(req.user._id)))) return res.status(403).json({ success: false, message: "Access denied" });
+    res.json({ success: true, order });
+  } catch (error) { next(error); }
+});
+
+module.exports = router;
