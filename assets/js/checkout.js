@@ -1,7 +1,9 @@
-const API = `${window.location.origin}/api`;
+const API = window.MENSWARE_API_URL || (window.location.hostname.endsWith("github.io") ? null : `${window.location.origin}/api`);
+const STATIC_CART_KEY = "mensware-static-cart";
 let cart = null;
 
 async function api(path, options = {}) {
+  if (!API) throw new Error("GitHub Pages preview mode does not provide the commerce API.");
   const response = await fetch(`${API}${path}`, {
     credentials: "include",
     headers: { "Content-Type": "application/json", ...(options.headers || {}) },
@@ -12,6 +14,13 @@ async function api(path, options = {}) {
   return data;
 }
 
+function escapeHtml(value) { return String(value ?? "").replace(/[&<>\'\"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char])); }
+
+function loadStaticCart() {
+  try { return JSON.parse(localStorage.getItem(STATIC_CART_KEY) || "[]"); }
+  catch { return []; }
+}
+
 function renderCart() {
   const element = document.getElementById("cart");
   const items = cart?.items || [];
@@ -20,18 +29,29 @@ function renderCart() {
     document.getElementById("form").hidden = true;
     return;
   }
-  element.innerHTML = items.map((item) => `<div class="item"><span>${escapeHtml(item.product?.name || "Product")} × ${item.quantity}</span><span>₹${((item.product?.basePrice || 0) * item.quantity).toLocaleString("en-IN")}</span></div>`).join("");
+  element.innerHTML = items.map((item) => `<div class="item"><span>${escapeHtml(item.product?.name || item.name || "Product")} × ${item.quantity}</span><span>₹${Number((item.product?.basePrice ?? item.price ?? 0) * item.quantity).toLocaleString("en-IN")}</span></div>`).join("");
+  if (!API) {
+    document.getElementById("form").hidden = true;
+    const notice = document.createElement("p");
+    notice.textContent = "Static preview: order placement is enabled on the full-stack deployment with the MENSWARE API.";
+    notice.style.color = "#aaa";
+    element.appendChild(notice);
+  }
 }
 
-function escapeHtml(value) { return String(value ?? "").replace(/[&<>\'"]/g, (char) => ({ "&": "&amp;", "<": "&lt;", ">": "&gt;", "'": "&#39;", '"': "&quot;" }[char])); }
-
 async function init() {
-  try { cart = (await api("/cart")).cart; renderCart(); }
-  catch (error) { document.getElementById("cart").textContent = error.message; }
+  try {
+    cart = API ? (await api("/cart")).cart : { items: loadStaticCart() };
+    renderCart();
+  } catch (error) {
+    document.getElementById("cart").textContent = error.message;
+    document.getElementById("form").hidden = true;
+  }
 }
 
 document.getElementById("form").addEventListener("submit", async (event) => {
   event.preventDefault();
+  if (!API) return;
   const submit = event.currentTarget.querySelector("button[type=submit]");
   submit.disabled = true;
   try {
