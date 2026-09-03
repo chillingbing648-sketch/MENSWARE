@@ -2,7 +2,7 @@
 
 ### Premium Men's E-Commerce · Full-Stack JavaScript
 
-> A dark, premium storefront backed by an Express + MongoDB commerce API.
+> A dark, premium storefront backed by an Express + MongoDB commerce API, with a GitHub Pages-compatible static catalog preview.
 
 [![Node.js](https://img.shields.io/badge/Node.js-20%2B-111111?logo=node.js)](https://nodejs.org/)
 [![Express](https://img.shields.io/badge/Express-5-111111?logo=express)](https://expressjs.com/)
@@ -10,12 +10,13 @@
 
 ## Architecture
 
-MENSWARE now follows a **thin-route + service-layer** architecture instead of placing most business logic inside route handlers or HTML files.
+MENSWARE follows a **thin-route + service-layer** architecture. Business logic is kept out of the HTTP adapters and storefront HTML.
 
 ```text
 Browser
   │
-  ├── index.html ──→ assets/js/app.js
+  ├── index.html ──→ assets/js/app.js ──→ Express API (full-stack)
+  │                                      └→ static catalog fallback (GitHub Pages)
   └── checkout.html → assets/js/checkout.js
                          │
                          ▼
@@ -39,7 +40,9 @@ See the detailed [architecture guide](docs/ARCHITECTURE.md).
 ## Core Features
 
 - Product catalog, search, categories and product lookup by ID/slug
-- Guest cart using a secure HTTP-only session cookie
+- GitHub Pages-compatible static catalog fallback
+- Guest cart using a secure HTTP-only session cookie on the full-stack deployment
+- Local browser preview cart on GitHub Pages
 - Authenticated cart tied to the customer account
 - Registration, login, `/me` and logout
 - Admin-only product creation, editing and archival
@@ -50,7 +53,7 @@ See the detailed [architecture guide](docs/ARCHITECTURE.md).
 - Connected checkout flow
 - Database-aware `/api/health` endpoint
 - Helmet, CORS, rate limiting and HTTP-only authentication cookies
-- Vercel routing for API, storefront, checkout and frontend assets
+- Vercel routing for the API/full-stack deployment
 
 ## API
 
@@ -86,9 +89,11 @@ MENSWARE/
 ├── server.js                 # Application composition root
 ├── config/
 │   └── database.js           # MongoDB connection lifecycle
-├── assets/js/
-│   ├── app.js                # Storefront client
-│   └── checkout.js           # Checkout client
+├── assets/
+│   ├── data/catalog.json     # Static GitHub Pages catalog fallback
+│   └── js/
+│       ├── app.js            # Storefront client + API/static fallback
+│       └── checkout.js       # Checkout client + preview handling
 ├── models/                   # Mongoose schemas
 ├── services/                 # Business logic
 │   ├── authService.js
@@ -126,6 +131,12 @@ NODE_ENV=development
 
 Open `http://localhost:5000`.
 
+## GitHub Pages vs Full-Stack Deployment
+
+GitHub Pages can serve the MENSWARE HTML/CSS/JavaScript but **cannot execute the Express server or connect directly to MongoDB**. The storefront therefore detects `github.io` hosts and loads the committed static catalog instead of repeatedly requesting `/api/products`.
+
+For the complete commerce experience — authentication, database-backed cart, checkout and orders — deploy the Express application using the supplied `vercel.json` configuration and provide the required environment variables.
+
 ## Verification
 
 ```bash
@@ -142,12 +153,13 @@ CI runs `npm run verify` on pushes and pull requests targeting `main`.
 - Variant stock is decremented as part of the order transaction. Production MongoDB should support transactions (for example MongoDB Atlas/replica set deployment).
 - The `online` payment method currently represents a payment-processing state; it is **not** a proof of successful payment. A real payment provider/webhook integration is still required before accepting online payments in production.
 - `fampay` is currently an allowed order method, not a live payment gateway integration.
+- Static GitHub Pages catalog entries are preview inventory and are not synchronized with MongoDB.
 
 ## Deployment
 
 `vercel.json` maps `/api/*` to the Express server and serves the HTML/frontend assets through Vercel's static layer. Production requires `MONGO_URI`, `JWT_SECRET` and `FRONTEND_URL` environment variables.
 
-The repository is deployment-ready at the code/configuration level, but a live production environment should still be smoke-tested for `/`, `/checkout`, `/api/health`, authentication, cart, checkout and order creation after environment variables are configured.
+GitHub Pages is suitable for the static storefront preview. The Pages build is triggered automatically from `main` in the repository's configured Pages workflow.
 
 ## Security Baseline
 
