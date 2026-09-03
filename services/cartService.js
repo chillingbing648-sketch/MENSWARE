@@ -6,12 +6,7 @@ function getSessionId(req, res) {
   let id = req.cookies?.cartSession;
   if (!id) {
     id = crypto.randomUUID();
-    res.cookie("cartSession", id, {
-      httpOnly: true,
-      sameSite: "lax",
-      secure: process.env.NODE_ENV === "production",
-      maxAge: 1000 * 60 * 60 * 24 * 30
-    });
+    res.cookie("cartSession", id, { httpOnly: true, sameSite: "lax", secure: process.env.NODE_ENV === "production", maxAge: 1000 * 60 * 60 * 24 * 30 });
   }
   return id;
 }
@@ -28,20 +23,22 @@ async function loadCart(req, res) {
   return cart;
 }
 
+function fail(message, statusCode) { const error = new Error(message); error.statusCode = statusCode; throw error; }
+
 async function addItem(req, res, { productId, variantId = null, quantity = 1 }) {
   const qty = Number(quantity);
-  if (!productId || !Number.isInteger(qty) || qty < 1 || qty > 20) {
-    const error = new Error("Valid product and quantity are required"); error.statusCode = 400; throw error;
-  }
+  if (!productId || !Number.isInteger(qty) || qty < 1 || qty > 20) fail("Valid product and quantity are required", 400);
   const product = await Product.findOne({ _id: productId, isActive: true });
-  if (!product) { const error = new Error("Product not found"); error.statusCode = 404; throw error; }
+  if (!product) fail("Product not found", 404);
   const variant = variantId ? product.variants.id(variantId) : null;
-  if (variantId && (!variant || !variant.isActive)) { const error = new Error("Invalid variant"); error.statusCode = 400; throw error; }
-  if (variant && variant.stock < qty) { const error = new Error("Insufficient stock"); error.statusCode = 409; throw error; }
+  if (variantId && (!variant || !variant.isActive)) fail("Invalid variant", 400);
 
   const cart = await loadCart(req, res);
   const existing = cart.items.find(item => item.product.toString() === String(productId) && String(item.variantId || "") === String(variantId || ""));
-  if (existing) existing.quantity = Math.min(existing.quantity + qty, 20);
+  const nextQuantity = (existing?.quantity || 0) + qty;
+  if (nextQuantity > 20) fail("Maximum quantity per item is 20", 400);
+  if (variant && variant.stock < nextQuantity) fail("Insufficient stock", 409);
+  if (existing) existing.quantity = nextQuantity;
   else cart.items.push({ product: productId, variantId, quantity: qty });
   await cart.save();
   await cart.populate("items.product");
@@ -50,10 +47,17 @@ async function addItem(req, res, { productId, variantId = null, quantity = 1 }) 
 
 async function updateItem(req, res, itemId, quantity) {
   const qty = Number(quantity);
-  if (!Number.isInteger(qty) || qty < 1 || qty > 20) { const error = new Error("Quantity must be between 1 and 20"); error.statusCode = 400; throw error; }
+  if (!Number.isInteger(qty) || qty < 1 || qty > 20) fail("Quantity must be between 1 and 20", 400);
   const cart = await loadCart(req, res);
   const item = cart.items.id(itemId);
-  if (!item) { const error = new Error("Cart item not found"); error.statusCode = 404; throw error; }
+  if (!item) fail("Cart item not found", 404);
+  const product = await Product.findOne({ _id: item.product, isActive: true });
+  if (!product) fail("Product is no longer available", 409);
+  if (item.variantId) {
+    const variant = product.variants.id(item.variantId);
+    if (!variant || !variant.isActive) fail("Selected variant is no longer available", 409);
+    if (variant.stock < qty) fail("Insufficient stock", 409);
+  }
   item.quantity = qty;
   await cart.save();
   await cart.populate("items.product");
@@ -63,7 +67,7 @@ async function updateItem(req, res, itemId, quantity) {
 async function removeItem(req, res, itemId) {
   const cart = await loadCart(req, res);
   const item = cart.items.id(itemId);
-  if (!item) { const error = new Error("Cart item not found"); error.statusCode = 404; throw error; }
+  if (!item) fail("Cart item not found", 404);
   item.deleteOne();
   await cart.save();
   await cart.populate("items.product");
