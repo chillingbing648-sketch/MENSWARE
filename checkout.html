@@ -1,1 +1,31 @@
-<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>MENSWARE | Checkout</title><link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Montserrat&display=swap" rel="stylesheet"><style>body{margin:0;background:#050505;color:#eee;font-family:Montserrat}.box{max-width:700px;margin:40px auto;padding:28px;background:#101010;border:1px solid #4b0000;border-radius:18px}h1{font:800 2rem Orbitron;color:#b30000}input,select,textarea,button{width:100%;padding:13px;margin:7px 0;box-sizing:border-box;border-radius:8px;border:1px solid #333;background:#090909;color:#fff}button{background:#b30000;border:0;font-weight:bold;cursor:pointer}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #222}.total{font-size:1.2rem;font-weight:bold;margin:20px 0}@media(max-width:600px){.row{grid-template-columns:1fr}}</style></head><body><div class="box"><h1>MENSWARE CHECKOUT</h1><div id="cart">Loading bag…</div><form id="form"><input id="name" required placeholder="Full name"><input id="email" required type="email" placeholder="Email"><input id="phone" placeholder="Phone"><textarea id="address" required placeholder="Address"></textarea><div class="row"><input id="city" required placeholder="City"><input id="state" required placeholder="State"></div><input id="postalCode" required placeholder="Postal code"><select id="payment"><option value="cod">Cash on Delivery</option><option value="online">Online Payment</option><option value="fampay">FaMPay</option></select><button type="submit">PLACE ORDER</button></form><p><a href="/" style="color:#b30000">← Continue shopping</a></p></div><script>const API=location.origin+'/api';let cart;async function api(p,o={}){const r=await fetch(API+p,{credentials:'include',headers:{'Content-Type':'application/json',...(o.headers||{})},...o});const d=await r.json().catch(()=>({}));if(!r.ok)throw Error(d.message||'Request failed');return d}async function init(){try{cart=(await api('/cart')).cart;const items=cart.items||[];if(!items.length){document.getElementById('cart').innerHTML='<p>Your bag is empty.</p>';document.getElementById('form').style.display='none';return}document.getElementById('cart').innerHTML=items.map(i=>`<div class="item"><span>${i.product?.name||'Product'} × ${i.quantity}</span><span>₹${((i.product?.basePrice||0)*i.quantity).toLocaleString('en-IN')}</span></div>`).join('')}catch(e){document.getElementById('cart').textContent=e.message}}document.getElementById('form').addEventListener('submit',async e=>{e.preventDefault();try{const items=(cart.items||[]).map(i=>({productId:i.product?._id,variantId:i.variantId||null,quantity:i.quantity}));const d=await api('/orders',{method:'POST',body:JSON.stringify({name:name.value,email:email.value,phone:phone.value,items,shippingAddress:{addressLine1:address.value,city:city.value,state:state.value,postalCode:postalCode.value},paymentMethod:payment.value})});await api('/cart',{method:'DELETE'});document.getElementById('cart').innerHTML=`<h2>Order confirmed</h2><p>Order: <strong>${d.order.orderNumber}</strong></p><p>Total: ₹${d.order.total.toLocaleString('en-IN')}</p>`;document.getElementById('form').style.display='none'}catch(e){alert(e.message)}});init();</script></body></html>
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width,initial-scale=1">
+  <meta name="description" content="MENSWARE secure checkout.">
+  <title>MENSWARE | Checkout</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com">
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+  <link href="https://fonts.googleapis.com/css2?family=Orbitron:wght@600;800&family=Montserrat&display=swap" rel="stylesheet">
+  <style>body{margin:0;background:#050505;color:#eee;font-family:Montserrat,sans-serif}.box{max-width:700px;margin:40px auto;padding:28px;background:#101010;border:1px solid #4b0000;border-radius:18px}h1{font:800 2rem Orbitron;color:#b30000}input,select,textarea,button{width:100%;padding:13px;margin:7px 0;box-sizing:border-box;border-radius:8px;border:1px solid #333;background:#090909;color:#fff}button{background:#b30000;border:0;font-weight:bold;cursor:pointer}button:disabled{opacity:.5;cursor:not-allowed}.row{display:grid;grid-template-columns:1fr 1fr;gap:10px}.item{display:flex;justify-content:space-between;padding:10px 0;border-bottom:1px solid #222}.total{font-size:1.2rem;font-weight:bold;margin:20px 0}.back{color:#b30000;text-decoration:none}@media(max-width:600px){.row{grid-template-columns:1fr}.box{margin:20px;padding:20px}}</style>
+</head>
+<body>
+  <main class="box">
+    <h1>MENSWARE CHECKOUT</h1>
+    <section id="cart" aria-live="polite">Loading bag…</section>
+    <form id="form">
+      <input id="name" required autocomplete="name" placeholder="Full name">
+      <input id="email" required type="email" autocomplete="email" placeholder="Email">
+      <input id="phone" autocomplete="tel" placeholder="Phone">
+      <textarea id="address" required autocomplete="street-address" placeholder="Address"></textarea>
+      <div class="row"><input id="city" required autocomplete="address-level2" placeholder="City"><input id="state" required autocomplete="address-level1" placeholder="State"></div>
+      <input id="postalCode" required autocomplete="postal-code" inputmode="numeric" placeholder="Postal code">
+      <select id="payment" aria-label="Payment method"><option value="cod">Cash on Delivery</option><option value="online">Online Payment</option><option value="fampay">FaMPay</option></select>
+      <button type="submit">PLACE ORDER</button>
+    </form>
+    <p><a class="back" href="/">← Continue shopping</a></p>
+  </main>
+  <script src="/assets/js/checkout.js" defer></script>
+</body>
+</html>
