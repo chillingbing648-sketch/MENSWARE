@@ -1,44 +1,56 @@
 # MENSWARE
 
-### Premium Men's E-Commerce • Full-Stack JavaScript
+### Premium Men's E-Commerce · Full-Stack JavaScript
 
-> A dark, premium storefront with a connected Express + MongoDB commerce backend.
+> A dark, premium storefront backed by an Express + MongoDB commerce API.
+
+[![Node.js](https://img.shields.io/badge/Node.js-20%2B-111111?logo=node.js)](https://nodejs.org/)
+[![Express](https://img.shields.io/badge/Express-5-111111?logo=express)](https://expressjs.com/)
+[![MongoDB](https://img.shields.io/badge/MongoDB-Mongoose-111111?logo=mongodb)](https://www.mongodb.com/)
 
 ## Architecture
 
+MENSWARE now follows a **thin-route + service-layer** architecture instead of placing most business logic inside route handlers or HTML files.
+
 ```text
 Browser
-  ├── /              → index.html
-  ├── /checkout      → checkout.html
-  └── /api/*         → Express → MongoDB
+  │
+  ├── index.html ──→ assets/js/app.js
+  └── checkout.html → assets/js/checkout.js
+                         │
+                         ▼
+                     Express API
+                         │
+             ┌───────────┴───────────┐
+             │                       │
+        Middleware                Routes
+     auth / errors          HTTP → service calls
+                                     │
+                                  Services
+                     auth / products / cart / orders
+                                     │
+                                  Mongoose
+                                     │
+                                  MongoDB
 ```
 
-## Tech Stack
+See the detailed [architecture guide](docs/ARCHITECTURE.md).
 
-| Layer | Technology | Reason |
-|---|---|---|
-| UI | HTML5 + CSS3 | Lightweight responsive storefront |
-| Interaction | Vanilla JavaScript | Fast, dependency-light browser layer |
-| Runtime | Node.js | JavaScript across the stack |
-| API | Express.js | Modular REST architecture |
-| Data | MongoDB + Mongoose | Flexible commerce documents + validation |
-| Auth | JWT + bcryptjs | Secure sessions + password hashing |
-| Security | Helmet + CORS + rate limiting | API hardening |
-| Deployment | Vercel-ready | API + static storefront deployment |
+## Core Features
 
-## Connected Features
-
-- Product catalog, search, categories and product detail API
-- Guest cart using secure session cookie
-- Authenticated cart tied to the user account
+- Product catalog, search, categories and product lookup by ID/slug
+- Guest cart using a secure HTTP-only session cookie
+- Authenticated cart tied to the customer account
 - Registration, login, `/me` and logout
-- Product/admin CRUD routes
-- Server-side order pricing and stock validation
+- Admin-only product creation, editing and archival
+- Server-side order pricing, validation and stock checks
+- MongoDB transaction-based variant stock decrement during checkout
 - Customer order history and protected order lookup
 - Admin order listing and status management
-- Checkout connected directly to cart + order APIs
-- `/api/health` database health check
-- Same-origin API configuration for production deployment
+- Connected checkout flow
+- Database-aware `/api/health` endpoint
+- Helmet, CORS, rate limiting and HTTP-only authentication cookies
+- Vercel routing for API, storefront, checkout and frontend assets
 
 ## API
 
@@ -71,23 +83,25 @@ PATCH  /api/orders/admin/:id/status  # admin
 MENSWARE/
 ├── index.html
 ├── checkout.html
-├── server.js
-├── package.json
+├── server.js                 # Application composition root
+├── config/
+│   └── database.js           # MongoDB connection lifecycle
+├── assets/js/
+│   ├── app.js                # Storefront client
+│   └── checkout.js           # Checkout client
+├── models/                   # Mongoose schemas
+├── services/                 # Business logic
+│   ├── authService.js
+│   ├── productService.js
+│   ├── cartService.js
+│   └── orderService.js
+├── middleware/               # Auth + centralized errors
+├── routes/                   # Thin HTTP adapters
+├── tests/                    # Regression tests
+├── docs/
+│   └── ARCHITECTURE.md
 ├── vercel.json
-├── models/
-│   ├── User.js
-│   ├── Product.js
-│   ├── Cart.js
-│   ├── Order.js
-│   └── OTP.js
-├── middleware/
-│   ├── auth.js
-│   └── errorHandler.js
-└── routes/
-    ├── authRoutes.js
-    ├── productRoutes.js
-    ├── cartRoutes.js
-    └── orderRoutes.js
+└── package.json
 ```
 
 ## Setup
@@ -112,20 +126,52 @@ NODE_ENV=development
 
 Open `http://localhost:5000`.
 
+## Verification
+
+```bash
+npm run check     # JavaScript syntax checks
+npm test          # Node regression tests
+npm run verify    # both checks together
+```
+
+CI runs `npm run verify` on pushes and pull requests targeting `main`.
+
+## Important Commerce Notes
+
+- Prices are recalculated on the server; the browser is not trusted for order totals.
+- Variant stock is decremented as part of the order transaction. Production MongoDB should support transactions (for example MongoDB Atlas/replica set deployment).
+- The `online` payment method currently represents a payment-processing state; it is **not** a proof of successful payment. A real payment provider/webhook integration is still required before accepting online payments in production.
+- `fampay` is currently an allowed order method, not a live payment gateway integration.
+
 ## Deployment
 
-The repository is configured for Vercel with an Express serverless runtime plus static HTML/media builds. Production requires `MONGO_URI`, `JWT_SECRET`, and `FRONTEND_URL` environment variables. The database connection is lazy and reusable for serverless requests.
+`vercel.json` maps `/api/*` to the Express server and serves the HTML/frontend assets through Vercel's static layer. Production requires `MONGO_URI`, `JWT_SECRET` and `FRONTEND_URL` environment variables.
 
-Vercel's current Express guidance recommends serving static assets through its static layer rather than relying on `express.static()`. citeturn2search1turn2search0
+The repository is deployment-ready at the code/configuration level, but a live production environment should still be smoke-tested for `/`, `/checkout`, `/api/health`, authentication, cart, checkout and order creation after environment variables are configured.
 
-## Verification Status
+## Security Baseline
 
-**Integration:** completed — storefront → auth → products → cart → checkout → orders are connected.
+- HTTP security headers through Helmet
+- CORS allowlist with credentials
+- HTTP-only auth cookies
+- Password hashing with bcrypt
+- JWT authentication and admin authorization
+- Global API rate limiting
+- JSON/urlencoded payload limits
+- Centralized error responses that hide internal errors in production
+- Server-side price, stock and order-state validation
 
-**Repository:** pushed to `main`.
+## Roadmap
 
-**Live production:** not marked as verified because this ChatGPT workspace has no existing Vercel project connected to MENSWARE, and no production environment variables are available. The repository is deployment-ready; after importing it into Vercel, smoke-test `/`, `/checkout`, and `/api/health` first.
+1. Request schemas with Zod/Joi
+2. Integration tests with a disposable MongoDB environment
+3. Real payment-provider adapter + webhook verification
+4. Cart merge when a guest signs in
+5. Structured logging and request IDs
+6. Stronger admin audit trail and RBAC
+7. E2E tests for storefront → cart → checkout → order
+8. Production monitoring and deployment smoke tests
 
 ## Author
 
-**Harsh Dubey** · GitHub: https://github.com/chillingbing648-sketch
+**Harsh Dubey** · [GitHub](https://github.com/chillingbing648-sketch)
