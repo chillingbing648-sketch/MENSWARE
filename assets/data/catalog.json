@@ -1,0 +1,80 @@
+[
+  {
+    "_id": "static-watch-001",
+    "name": "Apex Chronograph Watch",
+    "slug": "apex-chronograph-watch",
+    "description": "A bold chronograph-inspired timepiece for everyday wear.",
+    "category": "Watches",
+    "brand": "MENSWARE",
+    "images": ["https://images.unsplash.com/photo-1523170335258-f5ed11844a49?auto=format&fit=crop&w=900&q=80"],
+    "basePrice": 2499,
+    "variants": [{"_id":"static-watch-001-v1","size":"One Size","color":"Black","price":2499,"stock":10,"isActive":true}],
+    "isFeatured": true,
+    "isActive": true
+  },
+  {
+    "_id": "static-wallet-001",
+    "name": "Executive Leather Wallet",
+    "slug": "executive-leather-wallet",
+    "description": "Slim everyday wallet with a refined leather finish.",
+    "category": "Wallets",
+    "brand": "MENSWARE",
+    "images": ["https://images.unsplash.com/photo-1627123424574-724758594e93?auto=format&fit=crop&w=900&q=80"],
+    "basePrice": 1299,
+    "variants": [{"_id":"static-wallet-001-v1","size":"Standard","color":"Brown","price":1299,"stock":10,"isActive":true}],
+    "isFeatured": true,
+    "isActive": true
+  },
+  {
+    "_id": "static-belt-001",
+    "name": "Classic Leather Belt",
+    "slug": "classic-leather-belt",
+    "description": "Minimal leather belt designed for smart and casual outfits.",
+    "category": "Belts",
+    "brand": "MENSWARE",
+    "images": ["https://images.unsplash.com/photo-1624222247344-550fb60583dc?auto=format&fit=crop&w=900&q=80"],
+    "basePrice": 999,
+    "variants": [{"_id":"static-belt-001-v1","size":"32-40","color":"Black","price":999,"stock":10,"isActive":true}],
+    "isFeatured": false,
+    "isActive": true
+  },
+  {
+    "_id": "static-sunglasses-001",
+    "name": "Noir Frame Sunglasses",
+    "slug": "noir-frame-sunglasses",
+    "description": "Clean black frames with a modern silhouette.",
+    "category": "Accessories",
+    "brand": "MENSWARE",
+    "images": ["https://images.unsplash.com/photo-1511499767150-a48a237f0083?auto=format&fit=crop&w=900&q=80"],
+    "basePrice": 1499,
+    "variants": [{"_id":"static-sunglasses-001-v1","size":"One Size","color":"Black","price":1499,"stock":10,"isActive":true}],
+    "isFeatured": true,
+    "isActive": true
+  },
+  {
+    "_id": "static-cardholder-001",
+    "name": "Minimal Card Holder",
+    "slug": "minimal-card-holder",
+    "description": "Compact card holder for a clean everyday carry.",
+    "category": "Wallets",
+    "brand": "MENSWARE",
+    "images": ["https://images.unsplash.com/photo-1553062407-98eeb64c6a62?auto=format&fit=crop&w=900&q=80"],
+    "basePrice": 799,
+    "variants": [{"_id":"static-cardholder-001-v1","size":"Standard","color":"Black","price":799,"stock":10,"isActive":true}],
+    "isFeatured": false,
+    "isActive": true
+  },
+  {
+    "_id": "static-bracelet-001",
+    "name": "Steel Link Bracelet",
+    "slug": "steel-link-bracelet",
+    "description": "A restrained metal bracelet designed to layer easily.",
+    "category": "Accessories",
+    "brand": "MENSWARE",
+    "images": ["https://images.unsplash.com/photo-1617038220319-276d3cfab638?auto=format&fit=crop&w=900&q=80"],
+    "basePrice": 1099,
+    "variants": [{"_id":"static-bracelet-001-v1","size":"Adjustable","color":"Steel","price":1099,"stock":10,"isActive":true}],
+    "isFeatured": false,
+    "isActive": true
+  }
+]
