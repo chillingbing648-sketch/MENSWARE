@@ -1,1 +1,17 @@
-{"$schema":"https://openapi.vercel.sh/vercel.json","builds":[{"src":"server.js","use":"@vercel/node"},{"src":"*.html","use":"@vercel/static"},{"src":"*.jpeg","use":"@vercel/static"},{"src":"*.mp4","use":"@vercel/static"}],"routes":[{"src":"/api/(.*)","dest":"/server.js"},{"src":"/checkout","dest":"/checkout.html"},{"src":"/","dest":"/index.html"}]}
+{
+  "$schema": "https://openapi.vercel.sh/vercel.json",
+  "builds": [
+    { "src": "server.js", "use": "@vercel/node" },
+    { "src": "*.html", "use": "@vercel/static" },
+    { "src": "*.jpeg", "use": "@vercel/static" },
+    { "src": "*.mp4", "use": "@vercel/static" },
+    { "src": "assets/js/*.js", "use": "@vercel/static" }
+  ],
+  "routes": [
+    { "src": "/api/(.*)", "dest": "/server.js" },
+    { "src": "/assets/js/(.*)", "dest": "/assets/js/$1" },
+    { "src": "/checkout/?", "dest": "/checkout.html" },
+    { "src": "/checkout.html", "dest": "/checkout.html" },
+    { "src": "/", "dest": "/index.html" }
+  ]
+}
